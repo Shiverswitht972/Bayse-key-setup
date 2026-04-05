@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bayse API Key Setup</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --accent: #f5a623;
+    --accent2: #7c3aed;
+    --text: #e8e8f0;
+    --muted: #555570;
+    --success: #22c55e;
+    --error: #ef4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background-image: radial-gradient(ellipse at 20% 50%, rgba(124,58,237,0.08) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 20%, rgba(245,166,35,0.06) 0%, transparent 50%);
+  }
+
+  .container {
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .header {
+    margin-bottom: 40px;
+  }
+
+  .logo {
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--text);
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  .steps {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 32px;
+  }
+
+  .step-dot {
+    height: 3px;
+    flex: 1;
+    background: var(--border);
+    border-radius: 2px;
+    transition: background 0.3s ease;
+  }
+
+  .step-dot.active { background: var(--accent); }
+  .step-dot.done { background: var(--success); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 16px;
+  }
+
+  .card-label {
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--muted); }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0a0a0f;
+  }
+
+  .btn-primary:hover { background: #f0b845; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--accent2);
+    color: #a78bfa;
+  }
+
+  .btn-secondary:hover { background: rgba(124,58,237,0.1); }
+  .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .status {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'Space Mono', monospace;
+    display: none;
+    line-height: 1.5;
+  }
+
+  .status.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: var(--success); display: block; }
+  .status.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--error); display: block; }
+  .status.loading { background: rgba(245,166,35,0.08); border: 1px solid rgba(245,166,35,0.2); color: var(--accent); display: block; }
+
+  .key-box {
+    display: none;
+    margin-top: 20px;
+  }
+
+  .key-box.visible { display: block; }
+
+  .key-row {
+    margin-bottom: 12px;
+  }
+
+  .key-label {
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .key-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+
+  .key-text {
+    flex: 1;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    word-break: break-all;
+  }
+
+  .copy-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .copy-btn:hover { color: var(--accent); }
+
+  .warning-box {
+    background: rgba(245,166,35,0.08);
+    border: 1px solid rgba(245,166,35,0.25);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+    line-height: 1.6;
+    margin-top: 16px;
+  }
+
+  .panel-hidden { display: none; }
+
+  .note {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-top: 10px;
+    font-weight: 400;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">⬡ Bayse Cockpit</div>
+    <h1>API Key<br><span>Setup Tool</span></h1>
+    <p class="subtitle">Two steps. No terminal needed. Done in under 2 minutes.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+  </div>
+
+  <!-- STEP 1: LOGIN -->
+  <div class="card" id="step1">
+    <div class="card-label">Step 1 — Login</div>
+    <div class="field">
+      <label>EMAIL</label>
+      <input type="email" id="email" placeholder="you@bayse.com" autocomplete="email" />
+    </div>
+    <div class="field">
+      <label>PASSWORD</label>
+      <input type="password" id="password" placeholder="your bayse password" autocomplete="current-password" />
+    </div>
+    <p class="note">Signed up with Google or Apple? Set a password first via "Forgot Password" in the Bayse app, then come back here.</p>
+    <button class="btn btn-primary" id="loginBtn" style="margin-top:18px" onclick="doLogin()">Get Session Token →</button>
+    <div class="status" id="loginStatus"></div>
+  </div>
+
+  <!-- STEP 2: CREATE KEY -->
+  <div class="card panel-hidden" id="step2">
+    <div class="card-label">Step 2 — Create API Key</div>
+    <p class="note" style="margin-bottom:16px">You're logged in. Click below to generate your Bayse Cockpit API key. This only needs to be done once.</p>
+    <button class="btn btn-secondary" id="createBtn" onclick="doCreateKey()">Generate API Key →</button>
+    <div class="status" id="createStatus"></div>
+
+    <div class="key-box" id="keyBox">
+      <div class="key-row">
+        <div class="key-label">Public Key (pk_live_...)</div>
+        <div class="key-value">
+          <span class="key-text" id="pubKeyText">—</span>
+          <button class="copy-btn" onclick="copyKey('pubKeyText')" title="Copy">⧉</button>
+        </div>
+      </div>
+      <div class="key-row">
+        <div class="key-label">Secret Key (sk_live_...) — copy now, shown once</div>
+        <div class="key-value" style="border-color: rgba(245,166,35,0.4)">
+          <span class="key-text" id="secKeyText">—</span>
+          <button class="copy-btn" onclick="copyKey('secKeyText')" title="Copy">⧉</button>
+        </div>
+      </div>
+      <div class="warning-box">
+        ⚠ Save both keys somewhere safe before closing this tab. The secret key cannot be retrieved again.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let sessionToken = '';
+  let deviceId = '';
+
+  const BASE = 'https://relay.bayse.markets';
+
+  function setStatus(id, type, msg) {
+    const el = document.getElementById(id);
+    el.className = 'status ' + type;
+    el.textContent = msg;
+  }
+
+  async function doLogin() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const btn = document.getElementById('loginBtn');
+
+    if (!email || !password) {
+      setStatus('loginStatus', 'error', 'Please enter both email and password.');
+      return;
+    }
+
+    btn.disabled = true;
+    setStatus('loginStatus', 'loading', 'Logging in...');
+
+    try {
+      const res = await fetch(`${BASE}/v1/user/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setStatus('loginStatus', 'error', data.message || 'Login failed. Check your credentials.');
+        btn.disabled = false;
+        return;
+      }
+
+      sessionToken = data.token;
+      deviceId = data.deviceId;
+
+      setStatus('loginStatus', 'success', '✓ Logged in successfully.');
+      document.getElementById('dot1').classList.add('done');
+      document.getElementById('dot1').classList.remove('active');
+      document.getElementById('dot2').classList.add('active');
+
+      setTimeout(() => {
+        document.getElementById('step1').classList.add('panel-hidden');
+        document.getElementById('step2').classList.remove('panel-hidden');
+      }, 800);
+
+    } catch (err) {
+      setStatus('loginStatus', 'error', 'Network error. Check your internet and try again.');
+      btn.disabled = false;
+    }
+  }
+
+  async function doCreateKey() {
+    const btn = document.getElementById('createBtn');
+    btn.disabled = true;
+    setStatus('createStatus', 'loading', 'Creating API key...');
+
+    try {
+      const res = await fetch(`${BASE}/v1/user/me/api-keys`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': sessionToken,
+          'x-device-id': deviceId
+        },
+        body: JSON.stringify({ name: 'Bayse Cockpit' })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setStatus('createStatus', 'error', data.message || 'Failed to create key. Try logging in again.');
+        btn.disabled = false;
+        return;
+      }
+
+      document.getElementById('pubKeyText').textContent = data.publicKey;
+      document.getElementById('secKeyText').textContent = data.secretKey;
+      document.getElementById('keyBox').classList.add('visible');
+      document.getElementById('dot2').classList.add('done');
+      setStatus('createStatus', 'success', '✓ API key created. Copy both keys below.');
+
+    } catch (err) {
+      setStatus('createStatus', 'error', 'Network error. Try again.');
+      btn.disabled = false;
+    }
+  }
+
+  function copyKey(id) {
+    const text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const originalBtn = event.target;
+      originalBtn.textContent = '✓';
+      setTimeout(() => originalBtn.textContent = '⧉', 1500);
+    });
+  }
+
+  document.getElementById('password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+</script>
+</body>
+</html>
